@@ -54,7 +54,6 @@ class MainFragment : BaseFragment() {
         viewModel.repositoriesResponse().observe(this, repoObserver)
         //End 2.0
 
-
         viewModel.loadUserInfo("nguyenlinhnttu")
         btn_load_data.setOnClickListener {
             viewModel.loadRepositories("nguyenlinhnttu")
