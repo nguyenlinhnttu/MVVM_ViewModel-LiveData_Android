@@ -10,8 +10,8 @@ import com.mvvmviewmodel.livedata.model.UserRepository
 
 class UserViewModel : BaseViewModel() {
     private val TAG = UserViewModel::class.java.simpleName
-    lateinit var userData: LiveData<UserEntity>
-    lateinit var arrRepositories: LiveData<List<RepositoriesEntity>>
+    private lateinit var userData: LiveData<UserEntity>
+    private lateinit var arrRepositories: LiveData<List<RepositoriesEntity>>
     private var userRepository: UserRepository = UserRepository()
 
     fun getUserInfo(userId: String): LiveData<UserEntity> {

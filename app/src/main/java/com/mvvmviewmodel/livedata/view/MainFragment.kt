@@ -54,5 +54,4 @@ class MainFragment : BaseFragment() {
         }
     }
 
-
 }
