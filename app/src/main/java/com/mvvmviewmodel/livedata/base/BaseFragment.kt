@@ -8,8 +8,6 @@ import android.support.v4.app.Fragment
 import android.util.Log
 import android.view.*
 import com.mvvmviewmodel.livedata.R
-import com.mvvmviewmodel.livedata.api.BaseResponse
-import com.mvvmviewmodel.livedata.viewmodel.ICallBack
 
 /**
  * Created by NguyenLinh on 02,October,2018
@@ -32,13 +30,10 @@ abstract class BaseFragment : Fragment() {
 
     abstract fun setupData(view: View)
 
-    private fun showRequestError(baseRes: BaseResponse) {
-        Log.i(TAG, "showRequestError: " + baseRes.toString())
-    }
-
     private fun showQuestFailure(throwable: Throwable) {
+        Log.i(TAG, "showQuestFailure: " + throwable.message)
         if (throwable.message != null) {
-            Log.i(TAG, "showQuestFailure: " + throwable.message)
+
         }
     }
 
@@ -95,13 +90,6 @@ abstract class BaseFragment : Fragment() {
                     } else {
                         hideLoadingDialog()
                     }
-                }
-            }
-        })
-        viewModel.eventError.observe(this, Observer {
-            if (it != null) {
-                if (it.getContentIfNotHandled() != null) {
-                    showRequestError(it.peekContent())
                 }
             }
         })
