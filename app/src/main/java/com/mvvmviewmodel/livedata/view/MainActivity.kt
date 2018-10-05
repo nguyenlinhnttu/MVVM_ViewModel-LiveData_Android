@@ -1,9 +1,8 @@
 package com.mvvmviewmodel.livedata.view
 
 import android.os.Bundle
-import com.mvvmviewmodel.livedata.R
 import com.mvvmviewmodel.livedata.base.BaseActivity
-
+import com.mvvmviewmodel.livedata.R
 class MainActivity : BaseActivity() {
 
     override fun setupView(savedInstanceState: Bundle?) {

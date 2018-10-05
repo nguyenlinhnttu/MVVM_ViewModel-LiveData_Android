@@ -1,62 +1,58 @@
 package com.mvvmviewmodel.livedata.viewmodel
 
-import android.arch.lifecycle.LiveData
-import com.mvvmviewmodel.livedata.api.BaseResponse
+import android.annotation.SuppressLint
+import android.arch.lifecycle.MutableLiveData
+import com.mvvmviewmodel.livedata.api.ApiBuilder
 import com.mvvmviewmodel.livedata.base.BaseViewModel
 import com.mvvmviewmodel.livedata.model.RepositoriesEntity
 import com.mvvmviewmodel.livedata.model.UserEntity
-import com.mvvmviewmodel.livedata.model.UserRepository
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 
 
+@SuppressLint("CheckResult")
 class UserViewModel : BaseViewModel() {
     private val TAG = UserViewModel::class.java.simpleName
-    private lateinit var userData: LiveData<UserEntity>
-    private lateinit var arrRepositories: LiveData<List<RepositoriesEntity>>
-    private var userRepository: UserRepository = UserRepository()
+    private val userResponse = MutableLiveData<UserEntity>()
+    private var repositoriesResponse = MutableLiveData<List<RepositoriesEntity>>()
+    private val disposables = CompositeDisposable()
 
-    fun getUserInfo(userId: String): LiveData<UserEntity> {
-        if (this::userData.isInitialized && userData.value != null) {
-            return this.userData
-        } else {
-            userData = userRepository.getUser(userId, object : ICallBack {
-
-                override fun setProgress(show: Boolean) {
-                    showLoading(show)
-                }
-
-                override fun showRequestError(baseRes: BaseResponse) {
-
-                    showError(baseRes)
-                }
-
-                override fun showQuestFailure(throwable: Throwable) {
-                    showFailure(throwable)
-                }
-            })
-            return userData
-        }
+    fun userResponse(): MutableLiveData<UserEntity> {
+        return userResponse
     }
 
-    fun getRepositories(userId: String): LiveData<List<RepositoriesEntity>> {
-        if (this::arrRepositories.isInitialized && arrRepositories.value != null) {
-            return this.arrRepositories
-        } else {
-            arrRepositories = userRepository.getRepositories(userId, object : ICallBack {
-                override fun setProgress(show: Boolean) {
-                    showLoading(show)
-                }
+    fun repositoriesResponse(): MutableLiveData<List<RepositoriesEntity>> {
+        return repositoriesResponse
+    }
 
-                override fun showRequestError(baseRes: BaseResponse) {
+    fun loadUserInfo(userId: String) {
+        disposables.add(ApiBuilder.getWebService().getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { showLoading(true) }
+                .doFinally { showLoading(false) }
+                .subscribe({
+                    userResponse.value = it
+                }, {
+                    showFailure(it)
+                }))
+    }
 
-                    showError(baseRes)
-                }
+    fun loadRepositories(userId: String) {
+        ApiBuilder.getWebService().getRepositories(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { showLoading(true) }
+                .doFinally { showLoading(false) }
+                .subscribe({
+                    repositoriesResponse.value = it
+                }, {
+                    showFailure(it)
+                })
+    }
 
-                override fun showQuestFailure(throwable: Throwable) {
-                    showFailure(throwable)
-                }
-            })
-
-            return arrRepositories
-        }
+    override fun onCleared() {
+        disposables.clear()
     }
 }
