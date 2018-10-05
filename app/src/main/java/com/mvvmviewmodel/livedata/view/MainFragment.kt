@@ -25,7 +25,7 @@ class MainFragment : BaseFragment() {
     override fun setupViewModel() {
         if (!this::viewModel.isInitialized) {
             viewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
-            viewModel.init(this)
+            setObserveLive(viewModel)
         }
     }
 
@@ -46,7 +46,7 @@ class MainFragment : BaseFragment() {
                     for (repo in it) {
                         repoName.add(repo.name + "\n" + repo.full_name)
                     }
-                    val adapter = ArrayAdapter(context,
+                    val adapter = ArrayAdapter(context!!,
                             android.R.layout.simple_list_item_1, android.R.id.text1, repoName)
                     list_repositories.adapter = adapter
                 }

@@ -1,6 +1,7 @@
 package com.mvvmviewmodel.livedata.base
 
 import android.app.Dialog
+import android.arch.lifecycle.Observer
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -8,12 +9,12 @@ import android.util.Log
 import android.view.*
 import com.mvvmviewmodel.livedata.R
 import com.mvvmviewmodel.livedata.api.BaseResponse
-import com.mvvmviewmodel.livedata.viewmodel.IBaseView
+import com.mvvmviewmodel.livedata.viewmodel.ICallBack
 
 /**
  * Created by NguyenLinh on 02,October,2018
  */
-abstract class BaseFragment : Fragment(), IBaseView {
+abstract class BaseFragment : Fragment() {
     private val TAG = BaseFragment::class.java.simpleName
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(getRootLayoutId(), container, false)
@@ -31,26 +32,17 @@ abstract class BaseFragment : Fragment(), IBaseView {
 
     abstract fun setupData(view: View)
 
-    override fun setProgress(show: Boolean) {
-        Log.i(TAG, "setProgress: " + show.toString())
-        if (show) {
-            showLoadingDialog()
-        } else {
-            hideLoadingDialog()
-        }
-    }
-
-    override fun showRequestError(baseRes: BaseResponse) {
+    private fun showRequestError(baseRes: BaseResponse) {
         Log.i(TAG, "showRequestError: " + baseRes.toString())
     }
 
-    override fun showQuestFailure(throwable: Throwable) {
+    private fun showQuestFailure(throwable: Throwable) {
         if (throwable.message != null) {
             Log.i(TAG, "showQuestFailure: " + throwable.message)
         }
     }
 
-    lateinit var mProgressDialog: Dialog
+    private lateinit var mProgressDialog: Dialog
 
     private fun showLoadingDialog() {
         if (isVisible) {
@@ -94,4 +86,31 @@ abstract class BaseFragment : Fragment(), IBaseView {
         }
     }
 
+    fun setObserveLive(viewModel: BaseViewModel) {
+        viewModel.eventLoading.observe(this, Observer {
+            if (it != null) {
+                if (it.getContentIfNotHandled() != null) {
+                    if (it.peekContent()) {
+                        showLoadingDialog()
+                    } else {
+                        hideLoadingDialog()
+                    }
+                }
+            }
+        })
+        viewModel.eventError.observe(this, Observer {
+            if (it != null) {
+                if (it.getContentIfNotHandled() != null) {
+                    showRequestError(it.peekContent())
+                }
+            }
+        })
+        viewModel.eventFailure.observe(this, Observer {
+            if (it != null) {
+                if (it.getContentIfNotHandled() != null) {
+                    showQuestFailure(it.peekContent())
+                }
+            }
+        })
+    }
 }

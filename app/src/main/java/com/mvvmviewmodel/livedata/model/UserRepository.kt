@@ -2,10 +2,10 @@ package com.mvvmviewmodel.livedata.model
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.MutableLiveData
+import com.google.gson.Gson
 import com.mvvmviewmodel.livedata.api.ApiBuilder
 import com.mvvmviewmodel.livedata.api.BaseResponse
-import com.mvvmviewmodel.livedata.viewmodel.IBaseView
-import com.google.gson.Gson
+import com.mvvmviewmodel.livedata.viewmodel.ICallBack
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -16,45 +16,47 @@ import retrofit2.Response
  */
 class UserRepository {
 
-    fun getUser(userId: String, view: IBaseView): LiveData<UserEntity> {
-        view.setProgress(true)
+    fun getUser(userId: String, callBack: ICallBack): LiveData<UserEntity> {
+        callBack.setProgress(true)
         val data = MutableLiveData<UserEntity>()
         ApiBuilder.getWebService().getUser(userId).enqueue(object : Callback<UserEntity> {
             override fun onResponse(call: Call<UserEntity>, response: Response<UserEntity>) {
-                view.setProgress(false)
+                callBack.setProgress(false)
                 if (response.isSuccessful) {
                     data.value = response.body()
                 } else {
-                    view.showRequestError(Gson().fromJson(response.errorBody()!!.string(), BaseResponse::class.java))
+                    data.value = null
+                    callBack.showRequestError(Gson().fromJson(response.errorBody()!!.string(), BaseResponse::class.java))
                 }
             }
 
             override fun onFailure(call: Call<UserEntity>, t: Throwable) {
-                view.setProgress(false)
-                view.showQuestFailure(t)
+                callBack.setProgress(false)
                 data.value = null
+                callBack.showQuestFailure(t)
             }
         })
         return data
     }
 
-    fun getRepositories(userId: String, view: IBaseView): LiveData<List<RepositoriesEntity>> {
-        view.setProgress(true)
+    fun getRepositories(userId: String, callBack: ICallBack): LiveData<List<RepositoriesEntity>> {
+        callBack.setProgress(true)
         val data = MutableLiveData<List<RepositoriesEntity>>()
         ApiBuilder.getWebService().getRepositories(userId).enqueue(object : Callback<List<RepositoriesEntity>> {
             override fun onResponse(call: Call<List<RepositoriesEntity>>, response: Response<List<RepositoriesEntity>>) {
-                view.setProgress(false)
+                callBack.setProgress(false)
                 if (response.isSuccessful) {
                     data.value = response.body()
                 } else {
-                    view.showRequestError(Gson().fromJson(response.errorBody()!!.string(), BaseResponse::class.java))
+                    data.value = null
+                    callBack.showRequestError(Gson().fromJson(response.errorBody()!!.string(), BaseResponse::class.java))
                 }
             }
 
             override fun onFailure(call: Call<List<RepositoriesEntity>>, t: Throwable) {
-                view.setProgress(false)
-                view.showQuestFailure(t)
+                callBack.setProgress(false)
                 data.value = null
+                callBack.showQuestFailure(t)
             }
         })
         return data
