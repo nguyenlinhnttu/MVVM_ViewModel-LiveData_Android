@@ -13,7 +13,7 @@ import com.mvvmviewmodel.livedata.R
  * Created by NguyenLinh on 02,October,2018
  */
 abstract class BaseFragment : Fragment() {
-    private val TAG = BaseFragment::class.java.simpleName
+    protected val TAG = BaseFragment::class.java.simpleName
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(getRootLayoutId(), container, false)
     }
@@ -21,21 +21,14 @@ abstract class BaseFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupViewModel()
-        setupData(view)
+        setupUI(view)
     }
 
     abstract fun getRootLayoutId(): Int
 
     abstract fun setupViewModel()
 
-    abstract fun setupData(view: View)
-
-    private fun showQuestFailure(throwable: Throwable) {
-        Log.i(TAG, "showQuestFailure: " + throwable.message)
-        if (throwable.message != null) {
-
-        }
-    }
+    abstract fun setupUI(view: View)
 
     private lateinit var mProgressDialog: Dialog
 
@@ -63,15 +56,18 @@ abstract class BaseFragment : Fragment() {
                     }
                 }
             }
-            if (!activity!!.isFinishing && this::mProgressDialog.isInitialized && !mProgressDialog.isShowing) {
-                try {
-                    mProgressDialog.show()
-                    Log.i(TAG, "setProgress: success")
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
+            activity?.let {
+                if (!activity!!.isFinishing && this::mProgressDialog.isInitialized && !mProgressDialog.isShowing) {
+                    try {
+                        mProgressDialog.show()
+                        Log.i(TAG, "setProgress: success")
+                    } catch (ex: Exception) {
+                        ex.printStackTrace()
+                    }
 
+                }
             }
+
         }
     }
 
@@ -96,9 +92,15 @@ abstract class BaseFragment : Fragment() {
         viewModel.eventFailure.observe(this, Observer {
             if (it != null) {
                 if (it.getContentIfNotHandled() != null) {
-                    showQuestFailure(it.peekContent())
+                    showFailure(it.peekContent())
                 }
             }
         })
+    }
+
+    private fun showFailure(throwable: Throwable) {
+        if (throwable.message != null) {
+            Log.i(TAG, "showQuestFailure: " + throwable.message)
+        }
     }
 }

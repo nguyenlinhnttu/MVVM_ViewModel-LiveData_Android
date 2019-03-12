@@ -1,32 +1,28 @@
-package com.mvvmviewmodel.livedata.viewmodel
+package com.mvvmviewmodel.livedata.function.home
 
-import android.annotation.SuppressLint
 import android.arch.lifecycle.MutableLiveData
+import android.util.Log
 import com.mvvmviewmodel.livedata.api.ApiBuilder
 import com.mvvmviewmodel.livedata.base.BaseViewModel
 import com.mvvmviewmodel.livedata.model.RepositoriesEntity
 import com.mvvmviewmodel.livedata.model.UserEntity
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
 
-@SuppressLint("CheckResult")
 class UserViewModel : BaseViewModel() {
-    private val TAG = UserViewModel::class.java.simpleName
     private val userResponse = MutableLiveData<UserEntity>()
     private var repositoriesResponse = MutableLiveData<List<RepositoriesEntity>>()
-    private val disposables = CompositeDisposable()
 
-    fun userResponse(): MutableLiveData<UserEntity> {
+    fun showUserInfo(): MutableLiveData<UserEntity> {
         return userResponse
     }
 
-    fun repositoriesResponse(): MutableLiveData<List<RepositoriesEntity>> {
+    fun showRepositories(): MutableLiveData<List<RepositoriesEntity>> {
         return repositoriesResponse
     }
 
-    fun loadUserInfo(userId: String) {
+    fun getUserInfo(userId: String) {
         disposables.add(ApiBuilder.getWebService().getUser(userId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -39,8 +35,8 @@ class UserViewModel : BaseViewModel() {
                 }))
     }
 
-    fun loadRepositories(userId: String) {
-        ApiBuilder.getWebService().getRepositories(userId)
+    fun getRepositories(userId: String) {
+        disposables.add(ApiBuilder.getWebService().getRepositories(userId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe { showLoading(true) }
@@ -49,10 +45,11 @@ class UserViewModel : BaseViewModel() {
                     repositoriesResponse.value = it
                 }, {
                     showFailure(it)
-                })
+                }))
     }
 
     override fun onCleared() {
+        Log.d("UserViewModel", "onCleared")
         disposables.clear()
     }
 }

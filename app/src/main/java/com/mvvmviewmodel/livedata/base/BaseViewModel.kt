@@ -3,7 +3,7 @@ package com.mvvmviewmodel.livedata.base
 import android.arch.lifecycle.MutableLiveData
 import android.arch.lifecycle.ViewModel
 import com.mvvmviewmodel.livedata.api.BaseResponse
-import com.mvvmviewmodel.livedata.viewmodel.Event
+import io.reactivex.disposables.CompositeDisposable
 
 /**
  * Created by NguyenLinh on 05,October,2018
@@ -12,6 +12,7 @@ open class BaseViewModel : ViewModel() {
     val eventLoading = MutableLiveData<Event<Boolean>>()
     val eventError = MutableLiveData<Event<BaseResponse>>()
     val eventFailure = MutableLiveData<Event<Throwable>>()
+    val disposables = CompositeDisposable()
 
     fun showLoading(value: Boolean) {
         eventLoading.value = Event(value)
